@@ -71,16 +71,11 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
 
             CompletableFuture<Object> fut = new CompletableFuture<Object>();
             deployFutures.add(fut);
-            vertx.executeBlocking(blfut -> {
-                vertx.deployVerticle(WorkerVerticle.class.getName(),
-                        new DeploymentOptions().setConfig(deployConfig), deployHdl -> {
+            vertx.deployVerticle(WorkerVerticle.class.getName(),
+                    new DeploymentOptions().setConfig(deployConfig), deployHdl -> {
 //                            System.out.println("successfulyy deployed");
-                            fut.complete(null);
-                        });
-                blfut.complete();
-            }, res -> {
-
-            });
+                        fut.complete(null);
+                    });
         }
 
         final int[] sequences = new int[workerCount];
@@ -103,7 +98,7 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
                 vertx.eventBus().send("0", ringSize);
             });
 
-        Awaitility.waitAtMost(Duration.TEN_MINUTES).pollDelay(10, TimeUnit.MICROSECONDS).until(() -> collected.getCount() == 0);
+        Awaitility.waitAtMost(Duration.TEN_MINUTES).pollDelay(1, TimeUnit.MILLISECONDS).until(() -> collected.getCount() == 0);
         return sequences;
     }
 
