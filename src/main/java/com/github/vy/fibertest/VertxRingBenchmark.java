@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by bartek on 18.09.15.
@@ -31,18 +32,18 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
 
         @Override
         public void start() throws Exception {
-            System.out.println("Worker is starting");
+//            System.out.println("Worker is starting");
 
             myId = config().getInteger("id").toString();
             nextWorker = config().getInteger("next").toString();
 
-            System.out.println("My name is: " + myId + " my next pal is " + nextWorker);
+//            System.out.println("My name is: " + myId + " my next pal is " + nextWorker);
 
             MessageConsumer<Integer> cc = vertx.eventBus().consumer(myId);
             cc.handler(event -> {
 
                 int sequence = event.body();
-                System.out.println("Got work to do. Yay! Seq: " + sequence);
+//                System.out.println("Got work to do. Yay! Seq: " + sequence);
                 if (sequence < 1) {
                     vertx.eventBus().send(RESULTS_ADDRESS, sequence,
                             new DeliveryOptions().addHeader("id", myId));
@@ -73,7 +74,7 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
             vertx.executeBlocking(blfut -> {
                 vertx.deployVerticle(WorkerVerticle.class.getName(),
                         new DeploymentOptions().setConfig(deployConfig), deployHdl -> {
-                            System.out.println("successfulyy deployed");
+//                            System.out.println("successfulyy deployed");
                             fut.complete(null);
                         });
                 blfut.complete();
@@ -89,7 +90,7 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
             @Override
             public void handle(Message<Integer> event) {
                 int workerId = Integer.parseInt(event.headers().get("id"));
-                System.out.println("got result from " + workerId);
+//                System.out.println("got result from " + workerId);
                 sequences[workerId] = event.body();
                 collected.countDown();
             }
@@ -98,11 +99,11 @@ public class VertxRingBenchmark extends AbstractRingBenchmark {
         CompletableFuture.allOf((CompletableFuture<Object>[]) deployFutures.toArray(new CompletableFuture[0]))
             .thenAccept(cons ->
             {
-                System.out.println("Starting ring task");
+//                System.out.println("Starting ring task");
                 vertx.eventBus().send("0", ringSize);
             });
 
-        Awaitility.waitAtMost(Duration.FIVE_SECONDS).until(() -> collected.getCount() == 0);
+        Awaitility.waitAtMost(Duration.TEN_MINUTES).pollDelay(10, TimeUnit.MICROSECONDS).until(() -> collected.getCount() == 0);
         return sequences;
     }
 
