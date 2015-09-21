@@ -57,6 +57,6 @@ $JAVA_HOME/bin/java \
 -server -XX:+TieredCompilation -XX:+AggressiveOpts \
 -jar \"$uberJar\" \
 -jvmArgsAppend \"-DworkerCount=$workerCount -DringSize=$ringSize -javaagent:$quasarJar\" \
--wi 5 -i 10 -bm avgt -tu ms -f 5 \".*RingBenchmark.*\""
+-wi 5 -i 10 -bm avgt -tu ms -f 5 \".*VertxRingBenchmark.*\""
 echo "$cmd"
 eval "$cmd"
